@@ -13,7 +13,7 @@ import pymongo
 # from langchain_mistralai import MistralAIEmbeddings
 from langchain_community.embeddings import HuggingFaceInferenceAPIEmbeddings
 from typing import List
-import yake
+# import yake
 
 client = pymongo.MongoClient("mongodb+srv://jsckson_store:jsckson_store@cluster0.9a981.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 db = client["jacksonHardwareDB"]
@@ -55,64 +55,63 @@ def generate_embedding(text: str) -> List[float]:
     return response
 
 
-# def get_keywords(input_text):
-#     try:
-
-#         prompt = ChatPromptTemplate.from_messages([
-#     (
-#         "system",
-#         """ you are system that helps to extract main keywords from the user query.
-#         output should be a list of keywords that are extracted from the user query without brackets.
-#         """,
-#     ),
-#     (
-#         "human",
-#         "{input}"
-#     ),
-# ])
-#         chain = prompt | llm
-#         response = chain.invoke({"input": input_text})
-#         global keywords
-#         keywords +=response.content
-#         if len(keywords) > 50:
-#             keywords = keywords[10:]
-#         return response.content
-        
-#     except Exception as e:
-#         print(f"Error in get_response: {str(e)}")
-#         raise
-
-
-def get_keywords(user_query):
+def get_keywords(input_text):
     try:
-        # Initialize YAKE keyword extractor
-        language = "en"
-        max_ngram_size = 3
-        deduplication_threshold = 0.9
-        numOfKeywords = 4
-        yake_extractor = yake.KeywordExtractor(lan=language, n=max_ngram_size, dedupLim=deduplication_threshold, top=numOfKeywords, features=None)
 
-        # Extract keywords using YAKE
-        extracted_keywords = yake_extractor.extract_keywords(user_query)
-
-        # Extract the keywords from the result
-        k = [k for k, score in extracted_keywords]
-
-        # Remove duplicates and return the list of keywords
-        result = list(set(k))
+        prompt = ChatPromptTemplate.from_messages([
+    (
+        "system",
+        """ you are system that helps to extract main keywords from the user query.
+        output should be a list of keywords that are extracted from the user query without brackets.
+        """,
+    ),
+    (
+        "human",
+        "{input}"
+    ),
+])
+        chain = prompt | llm
+        response = chain.invoke({"input": input_text})
         global keywords
-        keywords = " ".join(result)
-        keywords += " ".join(result)
-        if len(keywords) > 80:
+        keywords +=response.content
+        if len(keywords) > 50:
             keywords = keywords[10:]
-
-        print(keywords)
-
-        return result
-    
+        return response.content
+        
     except Exception as e:
-        print(f"Error in extract_keywords_yake: {str(e)}")
+        print(f"Error in get_response: {str(e)}")
         raise
+
+
+# def get_keywords(user_query):
+#     try:
+#         # Initialize YAKE keyword extractor
+#         language = "en"
+#         max_ngram_size = 3
+#         deduplication_threshold = 0.9
+#         numOfKeywords = 4
+#         yake_extractor = yake.KeywordExtractor(lan=language, n=max_ngram_size, dedupLim=deduplication_threshold, top=numOfKeywords, features=None)
+
+#         # Extract keywords using YAKE
+#         extracted_keywords = yake_extractor.extract_keywords(user_query)
+
+#         # Extract the keywords from the result
+#         k = [k for k, score in extracted_keywords]
+
+#         # Remove duplicates and return the list of keywords
+#         result = list(set(k))
+#         global keywords
+#         keywords += " ".join(result)
+#         if len(keywords) > 80:
+#             keywords = keywords[10:]
+
+#         print(keywords)
+
+#         return result
+    
+#     except Exception as e:
+#         print(f"Error in extract_keywords_yake: {str(e)}")
+#         raise
 
 
 def convert_to_json(data):
@@ -424,5 +423,9 @@ def home():
 #     port = int(os.environ.get("PORT", 10000))  # Render assigns a dynamic port
 #     app.run(host="0.0.0.0", port=port)
 
+# Required for Vercel
+def handler(request, *args, **kwargs):
+    return app(request.environ, start_response)
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
